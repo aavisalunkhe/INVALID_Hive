@@ -24,7 +24,8 @@ import {
   Card,
   CardContent,
   Tabs,
-  Tab
+  Tab,
+  duration
 } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
 import EditIcon from '@mui/icons-material/Edit';
@@ -34,6 +35,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
+import { saveToBlockchain } from '../components/feedBlockInter/blockchainService';
 
 const prompts = {
   fiction: [
@@ -101,7 +103,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
     return () => clearInterval(interval);
   }, [timerRunning, timeRemaining]);
 
-  //count words
   useEffect(() => {
     const words = countWords(content);
     setWordCount(words);
@@ -126,7 +127,7 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
     setTimerRunning(true);
     if (distractingWebsitesExist()) {
       setDistractionShieldActive(true);
-      //implementing distracttion- proof extension
+      
       setNotification({
         show: true,
         message: 'Distraction shield activated. Focus mode enabled.',
@@ -148,7 +149,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
     }
   };
 
-  //implementing distraction- proof extension
   const distractingWebsitesExist = () => {
     return true;
   };
@@ -189,16 +189,11 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
 
     setIsSaving(true);
     try {
-      await saveToBlockchain({
-        content: content,
-        wordCount: wordCount,
-        genre: genre,
-        prompt: selectedPrompt,
-        duration: timerDuration,
-        completedAt: new Date().toISOString()
-      }, 'completed_session');
-
-      // Update daily progress
+      console.log(username, content);
+      await saveToBlockchain(
+        username, 
+        content,
+        'completed_session');
       setDailyProgress(prev => prev + wordCount);
 
       setNotification({
@@ -207,13 +202,10 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
         severity: 'success'
       });
 
-      // Reset session
       setContent('');
       setWordCount(0);
       setTimeRemaining(timerDuration * 60);
       setTimerRunning(false);
-      
-      // Recalculate progress after session save
       calculateProgress();
 
     } catch (error) {
@@ -233,7 +225,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
       yesterday.setDate(yesterday.getDate() - 1);
       const startOfWeek = new Date();
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-      //Fetch actual data from blockchain, abhi mock data use kia hai!!!!!!!!!!!!!!!!!!!!
       setYesterdayProgress({
         wordCount: 0,
         goalMet: false
@@ -269,7 +260,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
           <Tab label="Settings" />
         </Tabs>
 
-        {/* enter writing mode*/}
         {viewMode === 0 && (
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
@@ -583,7 +573,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
           </Paper>
         )}
 
-        {/*select prompt*/}
         <Dialog open={showPromptDialog} onClose={() => setShowPromptDialog(false)} maxWidth="md">
           <DialogTitle>Select a Writing Prompt</DialogTitle>
           <DialogContent>
@@ -614,7 +603,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
           </DialogActions>
         </Dialog>
 
-        {/*set goal*/}
         <Dialog open={showGoalDialog} onClose={() => setShowGoalDialog(false)}>
           <DialogTitle>Set Daily Writing Goal</DialogTitle>
           <DialogContent>
@@ -636,7 +624,6 @@ const DeepWorkZone = ({ saveToBlockchain, username }) => {
           </DialogActions>
         </Dialog>
 
-        {/*alert*/}
         <Snackbar
           open={notification.show}
           autoHideDuration={6000}

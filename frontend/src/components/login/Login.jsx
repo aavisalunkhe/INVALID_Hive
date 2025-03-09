@@ -42,7 +42,7 @@ const LoginComp = ({onLoginSuccess, onLogout}) => {
                         json: JSON.stringify({
                             type: "user_registration",
                             timestamp: new Date().toISOString(),
-                            app: 'cleanTxt/1.0'
+                            app: 'CleanTxt/1.0'
                         })
                     }
                 ]
@@ -80,7 +80,7 @@ const LoginComp = ({onLoginSuccess, onLogout}) => {
             await new Promise((resolve, reject)=> {
                 keychain.requestSignBuffer(
                     username,
-                    "cleanTxt sign-in with hive keychain",
+                    "CleanTxt sign-in with hive keychain",
                     "Posting",
                     (response)=> {
                         if(response.success){
@@ -142,20 +142,3 @@ const LoginComp = ({onLoginSuccess, onLogout}) => {
 }
 
 export default LoginComp
-
-
-// import { useState } from 'react'
-// import './App.css'
-// import LoginComp from './component/login/LoginComp'
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <LoginComp
-//     onLoginSuccess={(username) => { console.log("Logged in:", username); }} 
-//     onLogout={() => { console.log("Logged out"); }}
-//     />
-//   )
-// }
-
-// export default App

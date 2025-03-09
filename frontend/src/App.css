@@ -1,4 +1,3 @@
-/* Reset default styles */
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +13,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -33,8 +31,6 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
-
-/* Animation classes */
 .animated-gradient {
   background: linear-gradient(45deg, #4dabf5, #f06292);
   background-size: 200% 200%;
@@ -52,14 +48,10 @@ body {
     background-position: 0% 50%;
   }
 }
-
-/* Layout adjustments */
 .content-wrapper {
   min-height: calc(100vh - 64px);
   padding-top: 64px;
 }
-
-/* Material UI overrides */
 .MuiButton-root {
   text-transform: none !important;
 }

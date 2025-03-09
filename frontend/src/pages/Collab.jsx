@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import Cookies from 'js-cookie';
+import { EditorContent, useEditor } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { io } from 'socket.io-client';
 import {
   Box,
   Container,
   Typography,
-  Paper,
   Button,
   TextField,
   Grid,
@@ -27,10 +30,11 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import EditIcon from '@mui/icons-material/Edit';
 import { Client } from '@hiveio/dhive';
 
-const HIVESQL_API_KEY = import.meta.env.VITE_HIVESQL_API_KEY;
-const HIVESQL_ENDPOINT = 'https://hivesql.io/api/query';
+const SERVER_URL = "http://localhost:5000"; // WebSocket server URL
 
 const Collab = ({ username, client }) => {
+  const [user, setUser] = useState(Cookies.get('hiveUser') || null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!user);
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNewSessionDialog, setShowNewSessionDialog] = useState(false);
@@ -40,6 +44,7 @@ const Collab = ({ username, client }) => {
     genre: '',
     maxParticipants: 2
   });
+  const [editorContent, setEditorContent] = useState("");
   const [notification, setNotification] = useState({
     show: false,
     message: '',
@@ -59,17 +64,19 @@ const Collab = ({ username, client }) => {
     'Other'
   ];
 
+  const socket = io(SERVER_URL, { query: { user: user || "guest" }, transports: ["websocket"] });
+
   const fetchSessions = async () => {
     try {
       setLoading(true);
       const [activeSessions, newSessions] = await Promise.all([
         client.database.getDiscussions('trending', {
-          tag: 'cleanTxt',
+          tag: 'CleanTxt',
           limit: 50,
           truncate_body: false
         }),
         client.database.getDiscussions('created', {
-          tag: 'cleanTxt',
+          tag: 'CleanTxt',
           limit: 20,
           truncate_body: false
         })
@@ -82,7 +89,7 @@ const Collab = ({ username, client }) => {
         .filter(session => {
           try {
             const metadata = JSON.parse(session.json_metadata);
-            return metadata.app === 'cleanTxt' && metadata.type === 'collab_session';
+            return metadata.app === 'CleanTxt' && metadata.type === 'collab_session';
           } catch {
             return false;
           }
@@ -132,7 +139,7 @@ const Collab = ({ username, client }) => {
           if (op[0] === 'comment') {
             try {
               const metadata = JSON.parse(op[1].json_metadata);
-              return metadata.app === 'cleanTxt' && metadata.type === 'collab_session';
+              return metadata.app === 'CleanTxt' && metadata.type === 'collab_session';
             } catch {
               return false;
             }
@@ -149,6 +156,32 @@ const Collab = ({ username, client }) => {
     return () => stream.destroy();
   }, [client]);
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      socket.emit("join", user);
+    }
+  }, [isLoggedIn]);
+
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: " ",
+    onUpdate: ({ editor }) => {
+      if (socket && socket.connected) {
+        const json = editor.getJSON();
+        setEditorContent(json);
+        socket.emit("send-changes", { user, content: json });
+      }
+    },
+  });
+
+  useEffect(() => {
+    socket.on("receive-changes", (json) => {
+      if (editor) editor.commands.setContent(json);
+    });
+
+    return () => socket.off("receive-changes");
+  }, [editor]);
+
   const handleCreateSession = async () => {
     try {
       const permlink = new Date().toISOString().replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
@@ -156,13 +189,13 @@ const Collab = ({ username, client }) => {
         ['comment',
           {
             parent_author: '',
-            parent_permlink: 'cleanTxt',
+            parent_permlink: 'CleanTxt',
             author: username,
             permlink: permlink,
             title: newSession.title,
             body: newSession.description,
             json_metadata: JSON.stringify({
-              app: 'cleanTxt',
+              app: 'CleanTxt',
               type: 'collab_session',
               content: {
                 ...newSession,
@@ -218,9 +251,48 @@ const Collab = ({ username, client }) => {
     console.log('Joining session:', session);
   };
 
+  const saveToHive = () => {
+    const jsonData = { username: user, content: editorContent };
+    socket.emit("save-to-hive", jsonData);
+    setNotification({
+      show: true,
+      message: 'Content saved to Hive!',
+      severity: 'success'
+    });
+  };
+
+  const handleLogin = () => {
+    // Implement your login logic here
+    const username = prompt("Enter your Hive Username: ");
+    if (username) {
+      Cookies.set('hiveUser', username);
+      setUser(username);
+      setIsLoggedIn(true);
+    }
+  };
+
+  const handleLogout = () => {
+    Cookies.remove('hiveUser');
+    setUser(null);
+    setIsLoggedIn(false);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 8, mb: 4 }}>
+        {!isLoggedIn ? (
+          <Button variant="contained" onClick={handleLogin}>Login With Hive Keychain</Button>
+        ) : (
+          <Box>
+            <Typography variant="h6">Logged in as {user}</Typography>
+            <Button variant="outlined" onClick={handleLogout}>Logout</Button>
+            
+            <Typography variant="h4" sx={{ mt: 2 }}>Collaborative Writing</Typography>
+            <EditorContent editor={editor} />
+            <Button variant="contained" onClick={saveToHive} sx={{ mt: 2 }}>Save to Hive</Button>
+          </Box>
+        )}
+
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
           <Typography variant="h4" component="h1">
             Collaborative Writing

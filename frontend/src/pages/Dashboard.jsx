@@ -51,38 +51,31 @@ const Dashboard = ({ username }) => {
       const query = {
         select_authors: [username],
         limit: 100,
-        tag: 'cleanTxt',
+        tag: 'CleanTxt',
         truncate_body: false
       };
-
-      // First try to get user's blog posts
       const discussions = await client.database.getDiscussions('blog', {
         tag: username,
         limit: 100,
         truncate_body: false
       });
-
-      // Then get any posts they've interacted with
       const activityQuery = {
-        tag: 'cleanTxt',
+        tag: 'CleanTxt',
         limit: 100,
         truncate_body: false
       };
       const communityActivity = await client.database.getDiscussions('trending', activityQuery);
 
-      // Combine and filter the posts
       const allPosts = [...discussions, ...communityActivity];
       const cleanTxtPosts = allPosts.filter(post => {
         try {
           const metadata = JSON.parse(post.json_metadata);
-          return metadata.app === 'cleanTxt' && 
+          return metadata.app === 'CleanTxt' && 
                  (post.author === username || post.active_votes.some(vote => vote.voter === username));
         } catch {
           return false;
         }
       });
-
-      // Calculate stats
       let totalWords = 0;
       let totalSessions = 0;
       let totalCollabs = 0;
@@ -115,8 +108,6 @@ const Dashboard = ({ username }) => {
           console.error('Error processing post:', error);
         }
       });
-
-      // Sort activities by date
       recentActivities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       setStats({
@@ -129,7 +120,6 @@ const Dashboard = ({ username }) => {
 
       setRecentActivity(recentActivities.slice(0, 10));
       
-      // Calculate weekly progress
       const weeklyWords = calculateWeeklyWords(recentActivities);
       setWeeklyGoal(prev => ({
         ...prev,
@@ -274,7 +264,6 @@ const Dashboard = ({ username }) => {
             </Paper>
           </Grid>
 
-          {/* Recent Activity */}
           <Grid item xs={12}>
             <Paper>
               <List>

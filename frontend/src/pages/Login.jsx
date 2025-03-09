@@ -35,7 +35,7 @@ const LoginPage = ({ onLoginSuccess, onLogout }) => {
           <Grid item xs={12} md={6}>
             <Box sx={{ mb: 3 }}>
               <Typography variant="h3" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
-                cleanTxt
+                CleanTxt
               </Typography>
               <Typography variant="h5" color="text.secondary" gutterBottom>
                 A sanctuary for writers
@@ -51,7 +51,7 @@ const LoginPage = ({ onLoginSuccess, onLogout }) => {
             <Card elevation={3} sx={{ mb: 4 }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
-                  Why Join cleanTxt?
+                  Why Join CleanTxt?
                 </Typography>
                 <List>
                   <ListItem>
@@ -149,7 +149,7 @@ const LoginPage = ({ onLoginSuccess, onLogout }) => {
               <Box sx={{ mt: 3, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>
                 <Typography variant="body2" color="text.secondary">
                   <strong>What is Hive?</strong> Hive is a decentralized blockchain and ecosystem 
-                  for Web 3.0 content creators. By using Hive with cleanTxt, your writing journey is 
+                  for Web 3.0 content creators. By using Hive with CleanTxt, your writing journey is 
                   secured on the blockchain, giving you true ownership of your creative work.
                 </Typography>
               </Box>
@@ -158,7 +158,7 @@ const LoginPage = ({ onLoginSuccess, onLogout }) => {
             <Card sx={{ mt: 3, borderLeft: `4px solid ${theme.palette.primary.main}` }}>
               <CardContent>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Privacy Note:</strong> We value your creative privacy. cleanTxt 
+                  <strong>Privacy Note:</strong> We value your creative privacy. CleanTxt 
                   only requests the minimum permissions needed through Hive Keychain to authenticate you.
                   Your content is yours and always remains under your control.
                 </Typography>

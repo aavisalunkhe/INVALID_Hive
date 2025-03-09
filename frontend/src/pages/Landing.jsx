@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -19,9 +19,15 @@ import EditIcon from '@mui/icons-material/Edit';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 
-const Landing = () => {
+const Landing = ({ isLoggedIn }) => {
   const navigate = useNavigate();
   const theme = useTheme();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/deepwork');
+    }
+  }, [isLoggedIn, navigate]);
 
   const features = [
     {
@@ -71,7 +77,6 @@ const Landing = () => {
     }}>
       <Container maxWidth="lg">
         <Grid container spacing={6}>
-          {/* Hero Section */}
           <Grid item xs={12}>
             <Fade in={true} timeout={1000}>
               <Box textAlign="center" sx={{ mb: 8 }}>
@@ -86,7 +91,7 @@ const Landing = () => {
                     WebkitTextFillColor: 'transparent'
                   }}
                 >
-                  cleanTxt
+                  CleanTxt
                 </Typography>
                 <Typography 
                   variant="h5" 
@@ -95,31 +100,31 @@ const Landing = () => {
                 >
                   A sanctuary for writers to reclaim their creativity
                 </Typography>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => navigate('/deepwork')}
-                  startIcon={<EditIcon />}
-                  className="animated-gradient"
-                  sx={{
-                    py: 2,
-                    px: 4,
-                    fontSize: '1.2rem',
-                    borderRadius: '50px',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-3px)',
-                      boxShadow: '0 10px 25px rgba(77, 171, 245, 0.4)'
-                    }
-                  }}
-                >
-                  Start Writing
-                </Button>
+                {!isLoggedIn && (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => navigate('/login')}
+                    startIcon={<EditIcon />}
+                    className="animated-gradient"
+                    sx={{
+                      py: 2,
+                      px: 4,
+                      fontSize: '1.2rem',
+                      borderRadius: '50px',
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 10px 25px rgba(77, 171, 245, 0.4)'
+                      }
+                    }}
+                  >
+                    Login
+                  </Button>
+                )}
               </Box>
             </Fade>
           </Grid>
-
-          {/* Features Grid */}
           <Grid item xs={12}>
             <Grid container spacing={4}>
               {features.map((feature, index) => (
